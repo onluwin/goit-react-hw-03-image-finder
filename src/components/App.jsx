@@ -1,7 +1,6 @@
 import { Component } from 'react';
 
 import toast, { Toaster } from 'react-hot-toast';
-import { RotatingLines } from 'react-loader-spinner';
 
 import { Searchbar } from './Searchbar';
 import { ImageGallery } from './ImageGallery';
@@ -11,8 +10,8 @@ import { Modal } from './Modal';
 import { PixabayAPI } from 'API/fetchQuery';
 
 // STYLED COMPONENTS
-import { LoadingContainer } from './ImgFinder.styled';
 import { Error } from './Error';
+import { Loader } from './Loader';
 
 export class App extends Component {
   state = {
@@ -22,42 +21,31 @@ export class App extends Component {
     shouldShowModal: false,
     isLoading: false,
     error: false,
+    page: 1,
   };
-  FetchAPI = new PixabayAPI();
-  onInput = e => {
-    this.setState({ query: e.currentTarget.value });
-  };
-  onSubmit = e => {
-    e.preventDefault();
-    if (!this.state.query) {
-      toast.error(
-        'Sorry, there are no images matching your search query. Please try again.',
-        { position: 'top-right' }
-      );
-      return this.setState({ images: [] });
+  componentDidUpdate(_, prevState) {
+    if (this.state.query !== prevState.query) {
+      this.getImage(this.state.query);
     }
-
-    this.FetchAPI.resetPage();
+  }
+  getImage = query => {
+    const FetchAPI = new PixabayAPI();
+    FetchAPI.resetPage();
     try {
-      this.FetchAPI.fetchQuery(this.state.query)
+      FetchAPI.fetchQuery(query)
         .then(response => {
-          console.log(response.ok);
-          // if (!response.ok) {
-          //   return this.setState({ error: true, isLoading: false });
-          // }
-
           const { hits, total } = response;
           this.setState(prevState => {
             return { isLoading: !prevState.isLoading };
           });
           if (!hits.length) {
             toast.error(
-              `Ooops, there are no images with that query: ${this.state.query}`,
+              `Ooops, there are no images with that query: ${query}`,
               { position: 'top-right' }
             );
             return this.setState({ images: [] });
           }
-          this.FetchAPI.calculateTotalPages(total);
+          FetchAPI.calculateTotalPages(total);
           this.setState({ images: hits });
         })
         .catch(() => this.setState({ error: true }));
@@ -67,6 +55,14 @@ export class App extends Component {
       this.setState(prevState => {
         return { isLoading: !prevState.isLoading };
       });
+    }
+  };
+  FetchAPI = new PixabayAPI();
+  onSubmit = e => {
+    e.preventDefault();
+    this.setState({ query: e.target.elements.query.value.trim() });
+    if (!this.state.query) {
+      return;
     }
   };
   handleLoadMoreClick = e => {
@@ -114,23 +110,13 @@ export class App extends Component {
       this.state;
     return (
       <>
-        <Searchbar onInput={this.onInput} onSubmit={this.onSubmit} />
+        <Searchbar onSubmit={this.onSubmit} />
 
         {error && <Error message={`We're sorry but something went wrong`} />}
         {images && (
           <ImageGallery images={images} toggleModal={this.toggleModal} />
         )}
-        {isLoading && (
-          <LoadingContainer>
-            <RotatingLines
-              strokeColor="#3f51b5"
-              strokeWidth="5"
-              animationDuration="0.75"
-              width="96"
-              visible={true}
-            />
-          </LoadingContainer>
-        )}
+        {isLoading && <Loader />}
         {this.FetchAPI.isShowLoadMore && (
           <LoadMoreBtn handleLoadMoreClick={this.handleLoadMoreClick} />
         )}
