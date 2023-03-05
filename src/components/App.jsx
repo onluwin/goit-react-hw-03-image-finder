@@ -41,9 +41,9 @@ export class App extends Component {
       this.FetchAPI.fetchQuery(this.state.query)
         .then(response => {
           console.log(response.ok);
-          if (!response.ok) {
-            return this.setState({ error: true, isLoading: false });
-          }
+          // if (!response.ok) {
+          //   return this.setState({ error: true, isLoading: false });
+          // }
 
           const { hits, total } = response;
           this.setState(prevState => {
@@ -73,9 +73,9 @@ export class App extends Component {
     try {
       this.FetchAPI.fetchQuery(query)
         .then(response => {
-          if (!response.ok) {
-            return this.setState({ error: true });
-          }
+          // if (!response.ok) {
+          //   return this.setState({ error: true });
+          // }
           const { hits, total } = response;
           !this.FetchAPI.isShowLoadMore &&
             toast.success(
