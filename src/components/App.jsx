@@ -30,10 +30,11 @@ export class App extends Component {
   onSubmit = e => {
     e.preventDefault();
     if (!this.state.query) {
-      return toast.error(
+      toast.error(
         'Sorry, there are no images matching your search query. Please try again.',
         { position: 'top-right' }
       );
+      return this.setState({ images: [] });
     }
 
     this.FetchAPI.resetPage();
@@ -50,10 +51,11 @@ export class App extends Component {
             return { isLoading: !prevState.isLoading };
           });
           if (!hits.length) {
-            return toast.error(
+            toast.error(
               `Ooops, there are no images with that query: ${this.state.query}`,
               { position: 'top-right' }
             );
+            return this.setState({ images: [] });
           }
           this.FetchAPI.calculateTotalPages(total);
           this.setState({ images: hits });
@@ -76,6 +78,9 @@ export class App extends Component {
           // if (!response.ok) {
           //   return this.setState({ error: true });
           // }
+          this.setState(prevState => {
+            return { isLoading: !prevState.isLoading };
+          });
           const { hits, total } = response;
           !this.FetchAPI.isShowLoadMore &&
             toast.success(
@@ -90,6 +95,10 @@ export class App extends Component {
         .catch(() => this.setState({ error: true }));
     } catch {
       this.setState({ error: true });
+    } finally {
+      this.setState(prevState => ({
+        isLoading: !prevState.isLoading,
+      }));
     }
   };
 
@@ -106,6 +115,11 @@ export class App extends Component {
     return (
       <>
         <Searchbar onInput={this.onInput} onSubmit={this.onSubmit} />
+
+        {error && <Error message={`We're sorry but something went wrong`} />}
+        {images && (
+          <ImageGallery images={images} toggleModal={this.toggleModal} />
+        )}
         {isLoading && (
           <LoadingContainer>
             <RotatingLines
@@ -116,10 +130,6 @@ export class App extends Component {
               visible={true}
             />
           </LoadingContainer>
-        )}
-        {error && <Error message={`We're sorry but something went wrong`} />}
-        {images && (
-          <ImageGallery images={images} toggleModal={this.toggleModal} />
         )}
         {this.FetchAPI.isShowLoadMore && (
           <LoadMoreBtn handleLoadMoreClick={this.handleLoadMoreClick} />
