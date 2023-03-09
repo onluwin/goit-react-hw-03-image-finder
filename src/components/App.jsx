@@ -7,7 +7,12 @@ import { ImageGallery } from './ImageGallery';
 import { LoadMoreBtn } from './Button';
 import { Modal } from './Modal';
 
-import { isShowLoadMore, calculateTotalPages, fetchQuery } from 'API/fetchAPI';
+import {
+  isShowLoadMore,
+  calculateTotalPages,
+  resetTotalPages,
+  fetchQuery,
+} from 'API/fetchAPI';
 
 // STYLED COMPONENTS
 import { Error } from './Error';
@@ -25,11 +30,12 @@ export class App extends Component {
   };
 
   componentDidUpdate(_, prevState) {
-    if (
-      prevState.query !== this.state.query ||
-      prevState.page !== this.state.page
-    ) {
-      this.getImage(this.state.query);
+    const prevQuery = prevState.query;
+    const prevPage = prevState.page;
+    const { query, page } = this.state;
+
+    if (prevQuery !== query || prevPage !== page) {
+      this.getImage(query);
     }
   }
 
@@ -63,6 +69,12 @@ export class App extends Component {
           }
 
           calculateTotalPages(total);
+          if (!isShowLoadMore(page)) {
+            toast.success(
+              'We are ssory, but you have reached the end of search results',
+              { position: 'top-right' }
+            );
+          }
           this.setState(prevState => {
             return { images: [...prevState.images, ...hits] };
           });
@@ -82,29 +94,23 @@ export class App extends Component {
   onSubmit = e => {
     e.preventDefault();
 
-    this.resetImages();
-    this.resetPage();
-
     const value = e.target.elements.query.value.trim();
     if (!value) {
       return;
     }
+    this.setState(prevState => {
+      if (value !== this.state.query) {
+        this.resetImages();
+        this.resetPage();
+        resetTotalPages();
+        return;
+      }
+    });
+
     this.setState({ query: value });
   };
   handleLoadMoreClick = e => {
-    const { page } = this.state;
     this.incrementPage();
-    console.log(page);
-
-    // if (isShowLoadMore(page)) {
-    //   return this.incrementPage();
-    // }
-    if (!isShowLoadMore(page)) {
-      toast.success(
-        'We are ssory, but you have reached the end of search results',
-        { position: 'top-right' }
-      );
-    }
   };
 
   toggleModal = largeImageURL => {

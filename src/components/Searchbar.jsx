@@ -9,7 +9,9 @@ export class Searchbar extends Component {
     this.setState({ inputValue: e.currentTarget.value });
   };
   render() {
+    const { inputValue } = this.state;
     const { onSubmit } = this.props;
+
     return (
       <Header>
         <Form onSubmit={onSubmit}>
@@ -33,7 +35,7 @@ export class Searchbar extends Component {
             type="text"
             autocomplete="off"
             autoFocus
-            value={this.state.inputValue}
+            value={inputValue}
             placeholder="Search images and photos"
           />
         </Form>

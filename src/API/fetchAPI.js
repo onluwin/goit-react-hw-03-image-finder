@@ -19,4 +19,8 @@ export const calculateTotalPages = total => {
   console.log(totalPages);
 };
 
+export const resetTotalPages = () => {
+  totalPages = 0;
+};
+
 export const isShowLoadMore = page => page < totalPages;
