@@ -3,7 +3,7 @@ import axios from 'axios';
 axios.defaults.baseURL = 'https://pixabay.com/api/';
 
 // let page = 1;
-const per_page = 3;
+const per_page = 12;
 let totalPages = 0;
 let query = '';
 

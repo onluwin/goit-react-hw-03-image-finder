@@ -48,7 +48,6 @@ export class App extends Component {
   resetImages = () => this.setState({ images: [] });
   getImage = query => {
     const { page } = this.state;
-    let shouldChangeState = false;
     try {
       fetchQuery(query, page)
         .then(response => {
@@ -62,11 +61,9 @@ export class App extends Component {
             return this.resetImages();
           }
 
-          if (shouldChangeState) {
-            this.setState(prevState => {
-              return { isLoading: !prevState.isLoading };
-            });
-          }
+          this.setState(prevState => {
+            return { isLoading: !prevState.isLoading };
+          });
 
           calculateTotalPages(total);
           if (!isShowLoadMore(page)) {
@@ -83,11 +80,9 @@ export class App extends Component {
     } catch {
       this.setState({ error: true });
     } finally {
-      if (shouldChangeState) {
-        this.setState(prevState => {
-          return { isLoading: !prevState.isLoading };
-        });
-      }
+      this.setState(prevState => {
+        return { isLoading: !prevState.isLoading };
+      });
     }
   };
 
