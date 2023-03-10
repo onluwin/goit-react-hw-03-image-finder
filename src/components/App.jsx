@@ -57,6 +57,9 @@ export class App extends Component {
               `Ooops, there are no images with that query: ${query}`,
               { position: 'top-right' }
             );
+            this.setState(prevState => {
+              return { isLoading: !prevState.isLoading };
+            });
 
             return this.resetImages();
           }
@@ -127,7 +130,7 @@ export class App extends Component {
           <ImageGallery images={images} toggleModal={this.toggleModal} />
         )}
         {isLoading && <Loader />}
-        {isShowLoadMore(page) && (
+        {!isLoading && isShowLoadMore(page) && (
           <LoadMoreBtn handleLoadMoreClick={this.handleLoadMoreClick} />
         )}
         {shouldShowModal && (
